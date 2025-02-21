@@ -18,5 +18,10 @@ public class Membre {
     public void setNom(String nom) { this.nom = nom; }
     public String getEmail() { return email; }
     public void setEmail(String email) { this.email = email; }
+
+    @Override
+    public String toString() {
+        return nom;
+    }
 	
 }

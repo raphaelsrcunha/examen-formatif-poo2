@@ -15,6 +15,10 @@ public class BibliothequeService {
     public BibliothequeService() {
         this.dataAccess = DatabaseManager.getInstance();
     }
+    
+    public BibliothequeService(IDataAccess dataAccess) {
+        this.dataAccess = dataAccess;
+    }
 
     // LIVRES
     public void ajouterLivre(String titre, String auteur, String isbn) {
