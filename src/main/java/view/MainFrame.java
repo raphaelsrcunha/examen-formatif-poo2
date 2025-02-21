@@ -47,6 +47,14 @@ public class MainFrame extends JFrame {
 		menuBar.add(mnNewMenu);
 		
 		JMenuItem MenuItemEmprunt = new JMenuItem("Emprunt");
+		MenuItemEmprunt.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				EmpruntView empruntView = new EmpruntView();
+				setContentPane(empruntView);
+				revalidate();
+				repaint();
+			}
+		});
 		mnNewMenu.add(MenuItemEmprunt);
 		
 		JMenuItem MenuItemMembre = new JMenuItem("Membre");

@@ -22,5 +22,10 @@ public class Livre {
     public void setAuteur(String auteur) { this.auteur = auteur; }
     public String getIsbn() { return isbn; }
     public void setIsbn(String isbn) { this.isbn = isbn; }
+
+    @Override
+    public String toString() {
+        return titre;
+    }
     
 }

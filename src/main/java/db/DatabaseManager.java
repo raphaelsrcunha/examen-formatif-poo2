@@ -23,6 +23,7 @@ public class DatabaseManager implements IDataAccess {
 		try {
 			connection = DriverManager.getConnection(DB_URL);
 			initializeTables();
+			populateDB(connection);
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
@@ -331,6 +332,164 @@ public class DatabaseManager implements IDataAccess {
 	    }
 	}
 
-	
+	public static void populateDB(Connection connection) {
+        try {
+            // Desativa autocommit para garantir que todas as inserções sejam feitas em uma única transação
+            connection.setAutoCommit(false);
+            
+            // Popular tabela de livros
+            String sqlLivres = "INSERT INTO livres (titre, auteur, isbn) VALUES (?, ?, ?)";
+            try (PreparedStatement pstmt = connection.prepareStatement(sqlLivres)) {
+                // Livro 1
+                pstmt.setString(1, "Le Petit Prince");
+                pstmt.setString(2, "Antoine de Saint-Exupéry");
+                pstmt.setString(3, "9780156012195");
+                pstmt.executeUpdate();
+
+                // Livro 2
+                pstmt.setString(1, "Les Misérables");
+                pstmt.setString(2, "Victor Hugo");
+                pstmt.setString(3, "9780451419439");
+                pstmt.executeUpdate();
+
+                // Livro 3
+                pstmt.setString(1, "Notre-Dame de Paris");
+                pstmt.setString(2, "Victor Hugo");
+                pstmt.setString(3, "9780140443530");
+                pstmt.executeUpdate();
+
+                // Livro 4
+                pstmt.setString(1, "Madame Bovary");
+                pstmt.setString(2, "Gustave Flaubert");
+                pstmt.setString(3, "9780140449129");
+                pstmt.executeUpdate();
+
+                // Livro 5
+                pstmt.setString(1, "Le Comte de Monte-Cristo");
+                pstmt.setString(2, "Alexandre Dumas");
+                pstmt.setString(3, "9780140449266");
+                pstmt.executeUpdate();
+            }
+
+            // Popular tabela de membros
+            String sqlMembres = "INSERT INTO membres (nom, email) VALUES (?, ?)";
+            try (PreparedStatement pstmt = connection.prepareStatement(sqlMembres)) {
+                // Membro 1
+                pstmt.setString(1, "Jean Dupont");
+                pstmt.setString(2, "jean.dupont@email.com");
+                pstmt.executeUpdate();
+
+                // Membro 2
+                pstmt.setString(1, "Marie Martin");
+                pstmt.setString(2, "marie.martin@email.com");
+                pstmt.executeUpdate();
+
+                // Membro 3
+                pstmt.setString(1, "Pierre Bernard");
+                pstmt.setString(2, "pierre.bernard@email.com");
+                pstmt.executeUpdate();
+
+                // Membro 4
+                pstmt.setString(1, "Sophie Dubois");
+                pstmt.setString(2, "sophie.dubois@email.com");
+                pstmt.executeUpdate();
+
+                // Membro 5
+                pstmt.setString(1, "Lucas Moreau");
+                pstmt.setString(2, "lucas.moreau@email.com");
+                pstmt.executeUpdate();
+            }
+
+            // Popular tabela de emprunts
+            String sqlEmprunts = "INSERT INTO emprunts (livre_id, membre_id, date_emprunt, date_retour) VALUES (?, ?, ?, ?)";
+            try (PreparedStatement pstmt = connection.prepareStatement(sqlEmprunts)) {
+                // Empréstimo 1 - Livro devolvido
+                pstmt.setInt(1, 1);  // Livro id 1
+                pstmt.setInt(2, 1);  // Membro id 1
+                pstmt.setString(3, "2024-02-01");  // Data empréstimo
+                pstmt.setString(4, "2024-02-15");  // Data devolução
+                pstmt.executeUpdate();
+
+                // Empréstimo 2 - Em andamento
+                pstmt.setInt(1, 2);  // Livro id 2
+                pstmt.setInt(2, 2);  // Membro id 2
+                pstmt.setString(3, "2024-02-10");  // Data empréstimo
+                pstmt.setNull(4, java.sql.Types.DATE);  // Sem data de devolução
+                pstmt.executeUpdate();
+
+                // Empréstimo 3 - Livro devolvido
+                pstmt.setInt(1, 3);  // Livro id 3
+                pstmt.setInt(2, 3);  // Membro id 3
+                pstmt.setString(3, "2024-01-15");  // Data empréstimo
+                pstmt.setString(4, "2024-01-30");  // Data devolução
+                pstmt.executeUpdate();
+            }
+
+            // Confirma todas as inserções
+            connection.commit();
+            System.out.println("Banco de dados populado com sucesso!");
+
+        } catch (SQLException e) {
+            try {
+                // Em caso de erro, desfaz todas as inserções
+                System.out.println("Erro ao popular banco de dados. Realizando rollback...");
+                connection.rollback();
+                e.printStackTrace();
+            } catch (SQLException ex) {
+                ex.printStackTrace();
+            }
+        } finally {
+            try {
+                // Reativa autocommit
+                connection.setAutoCommit(true);
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    // Método para limpar todas as tabelas
+    public static void limparBancoDeDados(Connection connection) {
+        String[] queries = {
+            "DELETE FROM emprunts",
+            "DELETE FROM livres",
+            "DELETE FROM membres"
+        };
+
+        try {
+            connection.setAutoCommit(false);
+            
+            try (PreparedStatement pstmt = connection.prepareStatement("PRAGMA foreign_keys = OFF")) {
+                pstmt.execute();
+            }
+
+            for (String query : queries) {
+                try (PreparedStatement pstmt = connection.prepareStatement(query)) {
+                    pstmt.executeUpdate();
+                }
+            }
+
+            try (PreparedStatement pstmt = connection.prepareStatement("PRAGMA foreign_keys = ON")) {
+                pstmt.execute();
+            }
+
+            connection.commit();
+            System.out.println("Banco de dados limpo com sucesso!");
+
+        } catch (SQLException e) {
+            try {
+                connection.rollback();
+            } catch (SQLException ex) {
+                ex.printStackTrace();
+            }
+            e.printStackTrace();
+        } finally {
+            try {
+                connection.setAutoCommit(true);
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+	}
 	
 }
